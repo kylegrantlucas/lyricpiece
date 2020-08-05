@@ -8,4 +8,4 @@ A small tool for my command line, gets the currently playing spotify track and t
 
 ## Usage
 
-`$ lyricpiece <file>`
+`$ lyricpiece`
