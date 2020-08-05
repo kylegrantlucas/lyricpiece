@@ -1,0 +1,6 @@
+# github.com/andybrewer/mack v0.0.0-20200226161639-15be3d47cc54
+## explicit
+github.com/andybrewer/mack
+# gopkg.in/mattes/go-expand-tilde.v1 v1.0.0-20150330173918-cb884138e64c
+## explicit
+gopkg.in/mattes/go-expand-tilde.v1
