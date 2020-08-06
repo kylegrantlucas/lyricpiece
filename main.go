@@ -15,10 +15,25 @@ import (
 )
 
 func main() {
-	var lyrics, track, artist string
+	song := getCurrentSong()
 
-	rand.Seed(time.Now().Unix())
+	lyrics, err := getLyrics(song)
+	if err != nil {
+		panic(err)
+	}
 
+	lyricPiece := getRandomLyricPiece(lyrics)
+
+	fmt.Print(lyricPiece)
+}
+
+type Song struct {
+	Title  string
+	Artist string
+}
+
+func getCurrentSong() Song {
+	var track, artist string
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 
@@ -34,32 +49,43 @@ func main() {
 
 	wg.Wait()
 
-	filename, err := tilde.Expand(fmt.Sprintf("~/lyrics/%s-%s.txt", strings.TrimSpace(track), strings.TrimSpace(artist)))
+	return Song{Title: track, Artist: artist}
+}
+
+func getLyrics(song Song) (string, error) {
+	var lyrics string
+	filename, err := tilde.Expand(fmt.Sprintf("~/lyrics/%s-%s.txt", strings.TrimSpace(song.Title), strings.TrimSpace(song.Artist)))
 	if err != nil {
-		panic(err)
+		return lyrics, err
 	}
 
 	if fileExists(filename) {
 		file, err := ioutil.ReadFile(filename)
 		if err != nil {
-			panic(err)
+			return lyrics, err
 		}
 		lyrics = string(file)
 	} else {
-		downloadedLyrics, err := getLyrics(track, artist)
+		downloadedLyrics, err := queryLyrics(song)
 		if err != nil {
-			panic(err)
+			return lyrics, err
 		}
 
 		if downloadedLyrics != "" {
 			err = ioutil.WriteFile(filename, []byte(downloadedLyrics), 0644)
 			if err != nil {
-				panic(err)
+				return lyrics, err
 			}
 		}
 
 		lyrics = downloadedLyrics
 	}
+
+	return lyrics, nil
+}
+
+func getRandomLyricPiece(lyrics string) string {
+	rand.Seed(time.Now().Unix())
 
 	chunkedLyrics := strings.Split(lyrics, "\n\n")
 
@@ -71,12 +97,12 @@ func main() {
 	}
 
 	if len(fullLyrics) > 0 {
-		fmt.Print(
-			strings.TrimSpace(
-				fullLyrics[rand.Intn(len(fullLyrics))],
-			),
+		return strings.TrimSpace(
+			fullLyrics[rand.Intn(len(fullLyrics))],
 		)
 	}
+
+	return ""
 }
 
 func fileExists(filename string) bool {
@@ -87,15 +113,15 @@ func fileExists(filename string) bool {
 	return !info.IsDir()
 }
 
-func getLyrics(track, artist string) (string, error) {
+func queryLyrics(song Song) (string, error) {
 	req, err := http.NewRequest("GET", "https://makeitpersonal.co/lyrics", nil)
 	if err != nil {
 		return "", err
 	}
 
 	q := req.URL.Query()
-	q.Add("artist", artist)
-	q.Add("title", track)
+	q.Add("artist", song.Artist)
+	q.Add("title", song.Title)
 	req.URL.RawQuery = q.Encode()
 
 	timeout := time.Duration(5 * time.Second)
