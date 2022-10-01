@@ -1,6 +1,32 @@
+# github.com/PuerkitoBio/goquery v1.4.1
+## explicit
+github.com/PuerkitoBio/goquery
+# github.com/andybalholm/cascadia v1.0.0
+## explicit
+github.com/andybalholm/cascadia
 # github.com/andybrewer/mack v0.0.0-20200226161639-15be3d47cc54
 ## explicit
 github.com/andybrewer/mack
+# github.com/gopherjs/gopherjs v1.17.2
+## explicit; go 1.17
+# github.com/gosimple/slug v1.2.0
+## explicit
+github.com/gosimple/slug
+# github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be
+## explicit
+github.com/rainycape/unidecode
+# github.com/rhnvrm/lyric-api-go v0.1.4
+## explicit
+github.com/rhnvrm/lyric-api-go
+github.com/rhnvrm/lyric-api-go/genius
+github.com/rhnvrm/lyric-api-go/goquery_helpers
+github.com/rhnvrm/lyric-api-go/lyricswikia
+github.com/rhnvrm/lyric-api-go/musixmatch
+github.com/rhnvrm/lyric-api-go/songlyrics
+# golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d
+## explicit; go 1.17
+golang.org/x/net/html
+golang.org/x/net/html/atom
 # gopkg.in/mattes/go-expand-tilde.v1 v1.0.0-20150330173918-cb884138e64c
 ## explicit
 gopkg.in/mattes/go-expand-tilde.v1
