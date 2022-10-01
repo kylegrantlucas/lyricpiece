@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/rand"
-	"net/http"
 	"os"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/andybrewer/mack"
+	lyrics "github.com/rhnvrm/lyric-api-go"
 	tilde "gopkg.in/mattes/go-expand-tilde.v1"
 )
 
@@ -19,7 +19,7 @@ func main() {
 
 	lyrics, err := getLyrics(song)
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err)
 	}
 
 	lyricPiece := getRandomLyricPiece(lyrics)
@@ -114,36 +114,11 @@ func fileExists(filename string) bool {
 }
 
 func queryLyrics(song Song) (string, error) {
-	req, err := http.NewRequest("GET", "https://makeitpersonal.co/lyrics", nil)
+	l := lyrics.New()
+	lyric, err := l.Search(song.Artist, song.Title)
 	if err != nil {
 		return "", err
 	}
 
-	q := req.URL.Query()
-	q.Add("artist", song.Artist)
-	q.Add("title", song.Title)
-	req.URL.RawQuery = q.Encode()
-
-	timeout := time.Duration(5 * time.Second)
-	client := http.Client{
-		Timeout: timeout,
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	if strings.TrimSpace(string(body)) == "Sorry, We don't have lyrics for this song yet. Add them to https://lyrics.wikia.com" {
-		return "", nil
-	}
-
-	return string(body), nil
+	return lyric, nil
 }
