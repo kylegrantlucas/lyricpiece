@@ -3,14 +3,30 @@ package main
 import (
 	"fmt"
 	"os"
-	"sync"
 
-	"github.com/andybrewer/mack"
 	"github.com/kylegrantlucas/lyricpiece/lyricpiece"
+	"github.com/kylegrantlucas/lyricpiece/spotify"
 )
 
 func main() {
 	dbPath, err := buildDBPath()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	// call to spotify to get the currently playing song
+	spotClient, err := spotify.NewClient(dbPath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	song, err := spotClient.GetCurrentlyPlaying()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	// close up the DB so the lyricpiece client can use it
+	err = spotClient.Close()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
@@ -21,13 +37,14 @@ func main() {
 	}
 	defer client.Close()
 
-	song := getCurrentSong()
-	lyricPiece, err := client.GetLyricPiece(song)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-	}
+	if song != nil {
+		lyricPiece, err := client.GetLyricPiece(*song)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
 
-	fmt.Print(lyricPiece)
+		fmt.Print(lyricPiece)
+	}
 }
 
 func buildDBPath() (string, error) {
@@ -43,24 +60,4 @@ func buildDBPath() (string, error) {
 	}
 
 	return path + "/lyricpiece.db", nil
-}
-
-func getCurrentSong() lyricpiece.Song {
-	var track, artist string
-	wg := &sync.WaitGroup{}
-	wg.Add(2)
-
-	go func() {
-		track, _ = mack.Tell("Spotify", "name of current track as string")
-		wg.Done()
-	}()
-
-	go func() {
-		artist, _ = mack.Tell("Spotify", "artist of current track as string")
-		wg.Done()
-	}()
-
-	wg.Wait()
-
-	return lyricpiece.Song{Title: track, Artist: artist}
 }
