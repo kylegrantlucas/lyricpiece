@@ -34,7 +34,6 @@ func (lp *Client) GetLyricPiece(song Song) (string, error) {
 
 	lyrics, err := lp.getLyrics(lp.db, song)
 	if err != nil {
-		fmt.Println(err)
 		return "", err
 	}
 	chunkedLyrics := strings.Split(lyrics, "\n\n")
@@ -46,10 +45,19 @@ func (lp *Client) GetLyricPiece(song Song) (string, error) {
 		}
 	}
 
-	if len(fullLyrics) > 0 {
+	if len(fullLyrics) > 1 {
 		return strings.TrimSpace(
 			fullLyrics[rand.Intn(len(fullLyrics))],
 		), nil
+	} else if len(fullLyrics) == 1 {
+		splitLyrics := strings.Split(fullLyrics[0], "\n")
+		randSpot := rand.Intn(len(splitLyrics) - 4)
+
+		randEnd := (rand.Intn(4) + 4) + randSpot
+		if randEnd > len(splitLyrics)-1 {
+			randEnd = len(splitLyrics) - 1
+		}
+		return strings.TrimSpace(strings.Join(splitLyrics[randSpot:randEnd], "\n")), nil
 	}
 
 	return "", nil
